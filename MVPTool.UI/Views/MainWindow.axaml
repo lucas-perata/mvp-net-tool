@@ -1,0 +1,68 @@
+<Window
+    x:Class="MVPTool.UI.Views.MainWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:MVPTool.UI.ViewModels"
+    Title="MVPTool.UI"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="vm:MainWindowViewModel"
+    Background="Transparent"
+    Icon="/Assets/avalonia-logo.ico"
+    TransparencyLevelHint="AcrylicBlur"
+    ExtendClientAreaToDecorationsHint="True"
+    mc:Ignorable="d">
+
+
+    <Design.DataContext>
+        <!--
+            This only sets the DataContext for the previewer in an IDE,
+            to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs)
+        -->
+        <vm:MainWindowViewModel />
+    </Design.DataContext>
+
+    <StackPanel Margin="20" Spacing="15">
+        <!--  Nombre del Proyecto  -->
+        <StackPanel Spacing="5">
+            <TextBlock FontWeight="Bold" Text="Project Name:" />
+            <TextBox Text="{Binding ProjectName}" Watermark="MyAwesomeMVP" />
+        </StackPanel>
+
+        <!--  Ruta de Salida  -->
+        <StackPanel Spacing="5">
+            <TextBlock FontWeight="Bold" Text="Output Path:" />
+            <Grid VerticalAlignment="Center" ColumnDefinitions="*,Auto">
+                <TextBox
+                    Grid.Column="0"
+                    IsReadOnly="True"
+                    Text="{Binding OutputPath}" />
+                <Button
+                    Grid.Column="1"
+                    Margin="5,0,0,0"
+                    Command="{Binding SelectOutputPathCommand}"
+                    Content="Browse..." />
+            </Grid>
+        </StackPanel>
+
+        <!--  Características  -->
+        <StackPanel Spacing="10">
+            <TextBlock FontWeight="Bold" Text="Features:" />
+            <CheckBox Content="FastEndpoints" IsChecked="{Binding UseFastEndpoints}" />
+            <CheckBox Content="JWT Authentication" IsChecked="{Binding UseJwtAuth}" />
+            <CheckBox Content="Docker Support" IsChecked="{Binding UseDocker}" />
+            <CheckBox Content="Entity Framework Core" IsChecked="{Binding UseEfCore}" />
+        </StackPanel>
+
+        <!--  Botón de Generación  -->
+        <Button
+            Width="120"
+            Margin="0,20,0,0"
+            HorizontalAlignment="Right"
+            Command="{Binding GenerateCommand}"
+            Content="Generate MVP" />
+    </StackPanel>
+
+</Window>
