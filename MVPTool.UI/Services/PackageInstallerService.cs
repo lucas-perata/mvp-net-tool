@@ -14,15 +14,16 @@ public class PackageInstallerService
        _generator = generator; 
     }
 
-    public async Task InstallPackagesAsync(string outputhPath, bool UseFastEndpoints, bool useEfCore, bool useIdentity, bool useJwtAuth, IProgress<ProgressReport> progress)
+    public async Task InstallPackagesAsync(string outputhPath, bool UseFastEndpoints, bool useEfCore, bool useIdentity, IProgress<ProgressReport> progress)
     {
         var actions = new List<ActionContext>
         {
             new(UseFastEndpoints, "FastEndpoints", "Instalando FastEndpoints..."),
             new(UseFastEndpoints, "FastEndpoints.Swagger", "Instalando FastEndpoints Swagger..."),
             new(useEfCore, "Microsoft.EntityFrameworkCore", "Instalando Entity Framework Core..."),
+            new(useEfCore, "Microsoft.EntityFrameworkCore.Design", "Instalando EntityFrameworkCore Design..."),
             new(useIdentity, "Microsoft.AspNetCore.Identity.EntityFrameworkCore", "Instalando Identity Framework..."),
-            new(useJwtAuth, "Microsoft.AspNetCore.Authentication.JwtBearer", "Instalando JWT Bearer...")
+            new(useIdentity, "Microsoft.AspNetCore.Authentication.JwtBearer", "Instalando JWT Bearer...")
         };
 
         foreach(var action in actions.Where(a => a.Shouldexecute))

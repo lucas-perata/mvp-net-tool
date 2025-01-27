@@ -1,0 +1,16 @@
+using FastEndpoints;
+{{AddNamespaces}}
+
+var builder = WebApplication.CreateBuilder();
+builder.Services.AddFastEndpoints();
+
+{{AddServices}}  
+
+var app = builder.Build();
+
+{{AddAppUsing}}
+
+app.UseFastEndpoints();
+
+app.Run();
+

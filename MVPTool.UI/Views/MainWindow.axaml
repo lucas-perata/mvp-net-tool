@@ -48,8 +48,7 @@
         <StackPanel Spacing="10">
             <TextBlock FontWeight="Bold" Text="Features:" />
             <CheckBox Content="FastEndpoints" IsChecked="{Binding UseFastEndpoints}" />
-            <CheckBox Content =".NET Identity" IsChecked="{Binding UseIdentity}" />
-            <CheckBox Content="JWT Authentication" IsChecked="{Binding UseJwtAuth}" />
+            <CheckBox Content =".NET Identity + JWT" IsChecked="{Binding UseIdentity}" />
             <CheckBox Content="Docker Support" IsChecked="{Binding UseDocker}" />
             <CheckBox Content="Entity Framework Core" IsChecked="{Binding UseEfCore}" />
         </StackPanel>

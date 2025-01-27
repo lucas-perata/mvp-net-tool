@@ -15,10 +15,50 @@ namespace MVPTool.UI.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
+    private bool _useFastEndpoints = true;
+    public bool UseFastEndpoints
+    {
+        get => _useFastEndpoints;
+        set => this.RaiseAndSetIfChanged(ref _useFastEndpoints, value);
+    }
+
+    private bool _useIdentity;
+    public bool UseIdentity
+    {
+        get => _useIdentity;
+        set => this.RaiseAndSetIfChanged(ref _useIdentity, value);
+    }
+
+    private bool _useDocker;
+    public bool UseDocker
+    {
+        get => _useDocker;
+        set => this.RaiseAndSetIfChanged(ref _useDocker, value);
+    }
+
+    private bool _useEfCore;
+    public bool UseEfCore
+    {
+        get => _useEfCore;
+        set => this.RaiseAndSetIfChanged(ref _useEfCore, value);
+    }
+
     private readonly ProjectGeneratorService _generator = new ProjectGeneratorService();
+
 
     private async Task GenerateProjectAsync(IProgress<ProgressReport> progress)
     {
+        var options = new ProjectOptions
+        {
+            UseJwtAuth = _useIdentity,
+            UseEfCore = _useEfCore,
+            UseIdentity = _useIdentity,
+            UseDocker = _useDocker,
+            UseFastEndpoints = _useFastEndpoints
+        };
+
+        var generator = new ProjectGeneratorService(options); 
+
         try
         {
             IsProcessing = true;
@@ -29,7 +69,7 @@ public class MainWindowViewModel : ViewModelBase
             await Task.Delay(1000);
 
             string fullPath = Path.Combine(OutputPath, ProjectName);
-            _generator.CreateBaseProject(ProjectName, OutputPath);
+            generator.CreateBaseProject(ProjectName, OutputPath);
 
             report.Description = "Agregando paquetes NuGet...";
             report.Percentage = 50;
@@ -69,7 +109,6 @@ public class MainWindowViewModel : ViewModelBase
         _useFastEndpoints,
         _useEfCore,
         _useIdentity,
-        _useJwtAuth,
         progress);
     }
 
@@ -92,41 +131,7 @@ public class MainWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _outputPath, value);
     }
 
-    // Propiedades para los checkboxes
-    private bool _useFastEndpoints;
-    public bool UseFastEndpoints
-    {
-        get => _useFastEndpoints;
-        set => this.RaiseAndSetIfChanged(ref _useFastEndpoints, value);
-    }
 
-    private bool _useJwtAuth;
-    public bool UseJwtAuth
-    {
-        get => _useJwtAuth;
-        set => this.RaiseAndSetIfChanged(ref _useJwtAuth, value);
-    }
-
-    private bool _useIdentity;
-    public bool UseIdentity
-    {
-        get => _useIdentity;
-        set => this.RaiseAndSetIfChanged(ref _useIdentity, value);
-    }
-
-    private bool _useDocker;
-    public bool UseDocker
-    {
-        get => _useDocker;
-        set => this.RaiseAndSetIfChanged(ref _useDocker, value);
-    }
-
-    private bool _useEfCore;
-    public bool UseEfCore
-    {
-        get => _useEfCore;
-        set => this.RaiseAndSetIfChanged(ref _useEfCore, value);
-    }
 
     // Comandos
     public ReactiveCommand<Unit, Unit> SelectOutputPathCommand { get; }
@@ -142,15 +147,15 @@ public class MainWindowViewModel : ViewModelBase
             (name, path) => !string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(path)
         );
         GenerateCommand = ReactiveCommand.CreateFromTask(() =>
-   {
-       var progress = new Progress<ProgressReport>(report =>
-       {
-           ProgressValue = report.Percentage;
-           ProgressDescription = report.Description;
-       });
+    {
+        var progress = new Progress<ProgressReport>(report =>
+    {
+        ProgressValue = report.Percentage;
+        ProgressDescription = report.Description;
+    });
 
-       return GenerateProjectAsync(progress);
-   }, canGenerate);
+        return GenerateProjectAsync(progress);
+    }, canGenerate);
     }
 
     private async Task SelectOutputPath()
