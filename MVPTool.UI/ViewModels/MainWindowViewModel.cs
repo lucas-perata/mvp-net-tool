@@ -7,6 +7,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using MsBox.Avalonia;
+using MVPTool.UI.Models;
 using MVPTool.UI.Services;
 using ReactiveUI;
 
@@ -14,25 +15,62 @@ namespace MVPTool.UI.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
-    private readonly ProjectGenerator _generator = new ProjectGenerator();
+    private readonly ProjectGeneratorService _generator = new ProjectGeneratorService();
 
-    private async Task GenerateProjectAsync()
+    private async Task GenerateProjectAsync(IProgress<ProgressReport> progress)
     {
         try
         {
+            IsProcessing = true;
+            var report = new ProgressReport();
+            report.Description = "Creando estructura base del proyecto...";
+            report.Percentage = 25;
+            progress.Report(report);
+            await Task.Delay(1000);
+
             string fullPath = Path.Combine(OutputPath, ProjectName);
             _generator.CreateBaseProject(ProjectName, OutputPath);
 
+            report.Description = "Agregando paquetes NuGet...";
+            report.Percentage = 50;
+            progress.Report(report);
+            await Task.Delay(1000);
+
             string projectPath = Path.Combine(fullPath, $"{ProjectName}.csproj");
-            // TODO Packages
+            await AddPackagesToProjectAsync(progress);
+
+            report.Description = "Generando endpoints...";
+            report.Percentage = 75;
+            progress.Report(report);
+            await Task.Delay(1000);
             // TODO Modify Program.cs - Add Endpoints, etc 
 
-            await ShowDialogAsync("Proyecto generado exitosamente");
+            report.Description = "Proyecto completado...";
+            report.Percentage = 100;
+            progress.Report(report);
+            await Task.Delay(1000);
+
         }
         catch (Exception ex)
         {
             await ShowDialogAsync($"Error: {ex.Message}");
         }
+        finally
+        {
+            IsProcessing = false;
+        }
+    }
+
+    private async Task AddPackagesToProjectAsync(IProgress<ProgressReport> progress)
+    {
+        var installer = new PackageInstallerService(_generator);
+
+        await installer.InstallPackagesAsync(OutputPath,
+        _useFastEndpoints,
+        _useEfCore,
+        _useIdentity,
+        _useJwtAuth,
+        progress);
     }
 
     private async Task ShowDialogAsync(string message)
@@ -55,7 +93,7 @@ public class MainWindowViewModel : ViewModelBase
     }
 
     // Propiedades para los checkboxes
-    private bool _useFastEndpoints = true;
+    private bool _useFastEndpoints;
     public bool UseFastEndpoints
     {
         get => _useFastEndpoints;
@@ -69,6 +107,13 @@ public class MainWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _useJwtAuth, value);
     }
 
+    private bool _useIdentity;
+    public bool UseIdentity
+    {
+        get => _useIdentity;
+        set => this.RaiseAndSetIfChanged(ref _useIdentity, value);
+    }
+
     private bool _useDocker;
     public bool UseDocker
     {
@@ -76,7 +121,7 @@ public class MainWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _useDocker, value);
     }
 
-    private bool _useEfCore = true;
+    private bool _useEfCore;
     public bool UseEfCore
     {
         get => _useEfCore;
@@ -96,7 +141,16 @@ public class MainWindowViewModel : ViewModelBase
             x => x.OutputPath,
             (name, path) => !string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(path)
         );
-        GenerateCommand = ReactiveCommand.CreateFromTask(GenerateProjectAsync, canGenerate);
+        GenerateCommand = ReactiveCommand.CreateFromTask(() =>
+   {
+       var progress = new Progress<ProgressReport>(report =>
+       {
+           ProgressValue = report.Percentage;
+           ProgressDescription = report.Description;
+       });
+
+       return GenerateProjectAsync(progress);
+   }, canGenerate);
     }
 
     private async Task SelectOutputPath()
@@ -112,5 +166,25 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private double _progressValue;
+    public double ProgressValue
+    {
+        get => _progressValue;
+        private set => this.RaiseAndSetIfChanged(ref _progressValue, value);
+    }
+
+    private string _progressDescription = string.Empty;
+    public string ProgressDescription
+    {
+        get => _progressDescription;
+        private set => this.RaiseAndSetIfChanged(ref _progressDescription, value);
+    }
+
+    private bool _isProcessing;
+    public bool IsProcessing
+    {
+        get => _isProcessing;
+        private set => this.RaiseAndSetIfChanged(ref _isProcessing, value);
+    }
 
 }

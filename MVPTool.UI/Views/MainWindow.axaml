@@ -9,10 +9,7 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     x:DataType="vm:MainWindowViewModel"
-    Background="Transparent"
     Icon="/Assets/avalonia-logo.ico"
-    TransparencyLevelHint="AcrylicBlur"
-    ExtendClientAreaToDecorationsHint="True"
     mc:Ignorable="d">
 
 
@@ -51,6 +48,7 @@
         <StackPanel Spacing="10">
             <TextBlock FontWeight="Bold" Text="Features:" />
             <CheckBox Content="FastEndpoints" IsChecked="{Binding UseFastEndpoints}" />
+            <CheckBox Content =".NET Identity" IsChecked="{Binding UseIdentity}" />
             <CheckBox Content="JWT Authentication" IsChecked="{Binding UseJwtAuth}" />
             <CheckBox Content="Docker Support" IsChecked="{Binding UseDocker}" />
             <CheckBox Content="Entity Framework Core" IsChecked="{Binding UseEfCore}" />
@@ -63,6 +61,20 @@
             HorizontalAlignment="Right"
             Command="{Binding GenerateCommand}"
             Content="Generate MVP" />
+
+        <StackPanel IsVisible="{Binding IsProcessing}">
+            <ProgressBar
+                Height="20"
+                Margin="10"
+                Maximum="100"
+                Minimum="0"
+                Value="{Binding ProgressValue}" />
+
+            <TextBlock
+                Margin="5"
+                HorizontalAlignment="Center"
+                Text="{Binding ProgressDescription}" />
+        </StackPanel>
     </StackPanel>
 
 </Window>
